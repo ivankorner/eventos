@@ -1,0 +1,138 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                ║
+║                    ✅ LISTO PARA SUBIR A DON WEB                             ║
+║                                                                                ║
+║                              2026-04-09 16:13                                 ║
+║                                                                                ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+📋 CONTENIDO DE ESTA CARPETA
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Carpetas (contienen todo el código):
+   • app/               → Lógica de la aplicación (MVC)
+   • config/           → Configuraciones de BD, app, etc
+   • routes/           → Rutas de la aplicación
+   • public/           → Archivos públicos, CSS, JS, uploads
+   • vendor/           → Dependencias de Composer (18 MB, necesario)
+   • database/         → Scripts SQL (referencias)
+
+✅ Archivos:
+   • .env              → Configuración (credenciales Don Web incluidas)
+   • composer.json     → Definición de dependencias
+   • composer.lock     → Lock file de dependencias
+   • .htaccess         → Reescritura de URLs
+   • inscripciones_db_*.sql → Backup de BD para importar
+
+📊 TAMAÑO TOTAL: ~23 MB
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 PASOS FINALES (RÁPIDO)
+═══════════════════════════════════════════════════════════════════════════════
+
+1️⃣  EDITAR .env AQUÍ (cambiar solo 3 líneas):
+    
+    Abre: .env
+    
+    Cambiar:
+    ① APP_URL=https://TU_DOMINIO_REAL.com/eventos/public
+    ② APP_KEY=tu_clave_nueva (generar: openssl rand -hex 32)
+    ③ MAIL_USERNAME=tu_email@gmail.com
+    ④ MAIL_PASSWORD=tu_app_password (contraseña de aplicación)
+    
+    Todo lo demás ya está correcto:
+    • DB_HOST=localhost ✓
+    • DB_NAME=appc_eventos ✓
+    • DB_USER=appc_eventos ✓
+    • DB_PASS=$A8sA4!24vFAIXVs ✓
+
+2️⃣  SUBIR ESTA CARPETA VÍA FTP:
+    
+    • Host: ftp.tudominio.com (proporcionado por Don Web)
+    • Usuario: tu_usuario_ftp
+    • Contraseña: tu_pass_ftp
+    • Destino: /eventos
+    
+    Usar Filezilla, WinSCP, o similar
+    • Esto sube TODA la carpeta (app/, vendor/, etc.)
+    • Toma 5-10 minutos
+
+3️⃣  IMPORTAR BASE DE DATOS:
+    
+    • Ir a panel Don Web → phpMyAdmin
+    • Seleccionar BD: appc_eventos
+    • Pestaña: Importar
+    • Archivo: inscripciones_db_*.sql (de esta carpeta)
+    • Click: Ejecutar
+    
+    Debería crear tablas automáticamente
+
+4️⃣  CONFIGURAR PERMISOS (vía SSH si disponible):
+    
+    chmod 600 .env
+    chmod 775 public/uploads
+    chmod 775 public/uploads/*
+
+5️⃣  VERIFICAR:
+    
+    Abrir navegador:
+    https://tu_dominio.com/eventos/public
+    
+    Debería ver página de login o eventos públicos
+    Login: admin@sistema.com / Admin@2025! (cambiar después)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+⚠️  IMPORTANTE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. EDITAR .env AQUÍ ANTES DE SUBIR
+   (lo más importante: APP_URL y APP_KEY)
+
+2. CAMBIAR CONTRASEÑA ADMIN en primer login
+   (default: Admin@2025!)
+
+3. IMPORTAR BD desde inscripciones_db_*.sql
+   (en phpMyAdmin del servidor Don Web)
+
+4. REVISAR LOGS si hay problemas:
+   tail -100 storage/logs/errors.log
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+Antes de subir:
+   [ ] Edité .env con mi dominio
+   [ ] Generé APP_KEY nuevo
+   [ ] Configuré MAIL_*
+   [ ] Reviré .env antes de subir
+
+Después de subir:
+   [ ] Subí TODA esta carpeta a /eventos
+   [ ] Importé BD en phpMyAdmin
+   [ ] Configué permisos (chmod 600 .env)
+   [ ] Accedo a https://mi_dominio.com/eventos/public
+
+═══════════════════════════════════════════════════════════════════════════════
+
+¿AYUDA?
+═══════════════════════════════════════════════════════════════════════════════
+
+Credenciales Don Web (ya están en .env):
+   DB_HOST: localhost
+   DB_NAME: appc_eventos
+   DB_USER: appc_eventos
+   DB_PASS: $A8sA4!24vFAIXVs
+
+Si algo falla:
+   1. Revisar .env tiene valores correctos
+   2. Ver storage/logs/errors.log
+   3. Contactar Don Web (soporte)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+¡TODO LISTO! Sube esta carpeta y estará en producción 🚀
+
+═══════════════════════════════════════════════════════════════════════════════

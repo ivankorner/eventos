@@ -1,0 +1,4 @@
+# Redirige todo al directorio /public
+# Necesario cuando el dominio apunta al raíz del proyecto (shared hosting)
+RewriteEngine On
+RewriteRule ^(.*)$ public/$1 [L]

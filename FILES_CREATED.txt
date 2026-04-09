@@ -1,0 +1,178 @@
+================================================================================
+ARCHIVOS DE MIGRACIÓN CREADOS - 2026-04-09
+================================================================================
+
+Se han preparado los siguientes archivos y guías para facilitar tu migración
+a Don Web. Todos están en la carpeta raíz del proyecto.
+
+================================================================================
+📚 ARCHIVOS DE DOCUMENTACIÓN (Lee en este orden)
+================================================================================
+
+1. ✅ DEPLOY_README.md
+   └─ INICIO AQUÍ: Guía rápida y resumen de todo
+
+2. 📖 DEPLOYMENT_GUIDE.md
+   └─ Guía técnica completa con explicaciones detalladas
+
+3. 📋 DEPLOY_STEPS_DONWEB.md
+   └─ Pasos detallados paso a paso para ejecutar
+
+4. ✅ DEPLOY_CHECKLIST.md
+   └─ Checklist para no olvidar nada
+
+5. 🚀 DEPLOY_READY.md (NUEVO - Lee esto primero)
+   └─ Instrucciones finales con credenciales reales de Don Web
+
+================================================================================
+⚙️  ARCHIVOS DE CONFIGURACIÓN
+================================================================================
+
+1. ✅ .env.production
+   └─ Template con datos de Don Web (actualizado con credenciales reales)
+   
+2. ✅ .env.donweb (NUEVO)
+   └─ Archivo listo con credenciales reales
+      Database: appc_eventos
+      User: appc_eventos
+      Pass: $A8sA4!24vFAIXVs
+      (Solo cambiar: APP_URL, APP_KEY, MAIL_*)
+
+================================================================================
+🔧 SCRIPTS DE AUTOMATIZACIÓN
+================================================================================
+
+1. ✅ deploy-prepare.sh
+   └─ Script que prepara TODO automáticamente
+      Uso: bash deploy-prepare.sh
+      
+      Hace:
+      - Exporta BD local a backups/
+      - Instala vendor/ con Composer
+      - Prepara archivos en deploy-files/
+      - Crea verificaciones finales
+
+================================================================================
+📦 DESPUÉS DE EJECUTAR deploy-prepare.sh
+================================================================================
+
+Se crearán automáticamente:
+
+✅ deploy-files/
+   ├── app/                           (Código)
+   ├── config/                        (Configuración)
+   ├── routes/                        (Rutas)
+   ├── public/                        (Archivos públicos)
+   ├── vendor/                        (Dependencias)
+   ├── database/                      (Scripts SQL)
+   ├── .env                           (Configuración)
+   ├── inscripciones_db_*.sql         (Backup BD)
+   ├── composer.json
+   ├── composer.lock
+   └── CREDENCIALES_DONWEB.txt
+
+✅ backups/
+   └── inscripciones_db_YYYYMMDD_HHMMSS.sql
+
+================================================================================
+🚀 PRÓXIMOS PASOS
+================================================================================
+
+1. Lee: DEPLOY_READY.md (instrucciones finales)
+
+2. Ejecuta en terminal:
+   bash deploy-prepare.sh
+
+3. Edita:
+   - deploy-files/.env (agregar tu dominio y APP_KEY)
+   - O copia .env.donweb como deploy-files/.env
+
+4. Sube vía FTP a Don Web:
+   - Conectar a /eventos
+   - Subir contenido de deploy-files/
+   - Incluir vendor/
+
+5. Importa BD en phpMyAdmin:
+   - Usar: deploy-files/inscripciones_db_*.sql
+   - BD: appc_eventos
+
+6. Configura permisos:
+   - chmod 600 .env
+   - chmod 775 public/uploads
+
+7. Abre navegador:
+   - https://tu_dominio.com/eventos/public
+
+================================================================================
+📝 IMPORTANTE
+================================================================================
+
+✅ CREDENCIALES DON WEB (ya configuradas):
+   Database Name: appc_eventos
+   Database User: appc_eventos
+   Password: $A8sA4!24vFAIXVs
+
+⚠️  COSAS A CAMBIAR DESPUÉS:
+   1. APP_URL en .env → Tu dominio real
+   2. APP_KEY → Generar nuevo: openssl rand -hex 32
+   3. MAIL_* → Tu email (Gmail recomendado)
+   4. Contraseña admin → Cambiar en primer login
+
+❌ NUNCA SUBIR:
+   - .DS_Store (archivos macOS)
+   - .git/ (opcional)
+   - Archivo .env original (solo como .env)
+
+================================================================================
+✅ CHECKLIST RÁPIDO
+================================================================================
+
+Antes de deploy:
+   [ ] Ejecuté bash deploy-prepare.sh
+   [ ] Tengo carpeta deploy-files/ con contenido
+   [ ] Tengo backups/inscripciones_db_*.sql
+   [ ] Edité deploy-files/.env con mi dominio
+
+Durante deploy:
+   [ ] Subí archivos a /eventos vía FTP
+   [ ] Importé BD en phpMyAdmin
+   [ ] Configuré permisos (chmod)
+
+Después de deploy:
+   [ ] Accedo a https://mi_dominio.com/eventos/public
+   [ ] Login con admin@sistema.com / Admin@2025!
+   [ ] Cambié contraseña admin
+   [ ] Dashboard funciona sin errores
+
+================================================================================
+📞 AYUDA
+================================================================================
+
+Si algo no funciona:
+
+1. Revisa storage/logs/errors.log en servidor
+2. Verifica credenciales en .env son correctas
+3. Contacta Don Web (soporte@donweb.com)
+4. Consulta las guías detalladas (ver documentación arriba)
+
+================================================================================
+📞 SOPORTE TÉCNICO
+================================================================================
+
+Documentación del Proyecto:
+   - DEPLOY_READY.md          ← Instrucciones finales (EMPIEZA AQUÍ)
+   - DEPLOYMENT_GUIDE.md       ← Guía técnica completa
+   - DEPLOY_STEPS_DONWEB.md    ← Pasos detallados
+   - DEPLOY_CHECKLIST.md       ← Verificaciones
+
+Contacto Don Web:
+   - Panel → Soporte
+   - Email: soporte@donweb.com
+   - Mención: Módulos PHP, mod_rewrite, BD
+
+================================================================================
+Version: 1.0
+Fecha: 2026-04-09
+Servidor Target: Don Web Shared Hosting
+Base de Datos: appc_eventos
+================================================================================
