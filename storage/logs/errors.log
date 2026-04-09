@@ -1,0 +1,29 @@
+[2026-04-09 07:38:53] [::1] [/parlamentos/public/admin/configuracion/email-prueba] Error enviando email a ivankorner@gmail.com: SMTP Error: Could not authenticate.
+[2026-04-09 15:24:15] [::1] [/parlamentos/public/admin/eventos/1/editar] [EXCEPTION] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'visibility' in 'field list' en /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Models/BaseModel.php:78
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Models/BaseModel.php(78): PDO->prepare('UPDATE `events`...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Controllers/EventController.php(163): BaseModel->update(1, Array)
+#2 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/config/routes.php(103): EventController->update(Array)
+#3 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/public/index.php(30): Router->dispatch()
+#4 {main}
+[2026-04-09 15:24:53] [::1] [/parlamentos/public/admin/dashboard] [EXCEPTION] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'visibility' in 'where clause' en /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Models/EventModel.php:137
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Models/EventModel.php(137): PDO->query('SELECT COUNT(*)...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Controllers/DashboardController.php(20): EventModel->getDashboardMetrics()
+#2 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/config/routes.php(103): DashboardController->index(Array)
+#3 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/public/index.php(30): Router->dispatch()
+#4 {main}
+[2026-04-09 15:24:57] [::1] [/parlamentos/public/admin/dashboard] [EXCEPTION] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'visibility' in 'where clause' en /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Models/EventModel.php:137
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Models/EventModel.php(137): PDO->query('SELECT COUNT(*)...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Controllers/DashboardController.php(20): EventModel->getDashboardMetrics()
+#2 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/config/routes.php(103): DashboardController->index(Array)
+#3 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/public/index.php(30): Router->dispatch()
+#4 {main}
+[2026-04-09 15:25:08] [::1] [/parlamentos/public/admin/eventos/1/editar] [EXCEPTION] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'visibility' in 'field list' en /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Models/BaseModel.php:78
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Models/BaseModel.php(78): PDO->prepare('UPDATE `events`...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/app/Controllers/EventController.php(163): BaseModel->update(1, Array)
+#2 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/config/routes.php(103): EventController->update(Array)
+#3 /Applications/XAMPP/xamppfiles/htdocs/parlamentos/public/index.php(30): Router->dispatch()
+#4 {main}

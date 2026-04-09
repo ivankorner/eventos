@@ -6,6 +6,8 @@
     <title><?= htmlspecialchars($pageTitle ?? 'Admin', ENT_QUOTES, 'UTF-8') ?> — <?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         [x-cloak] { display: none !important; }
 
@@ -172,29 +174,40 @@
         </div>
     </header>
 
-    <!-- Alertas flash -->
-    <div class="px-4 sm:px-6 pt-4">
+    <!-- SweetAlert Flash Notifications -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
         <?php if ($flashSuccess = Session::getFlash('success')): ?>
-        <div class="flex items-start gap-3 bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-3 mb-4" role="alert">
-            <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span><?= $flashSuccess ?></span>
-        </div>
+        Swal.fire({
+            icon: 'success',
+            title: '¡Éxito!',
+            text: <?= json_encode($flashSuccess) ?>,
+            confirmButtonColor: '#1168D9',
+            confirmButtonText: 'Aceptar'
+        });
         <?php endif; ?>
 
         <?php if ($flashError = Session::getFlash('error')): ?>
-        <div class="flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 rounded-lg px-4 py-3 mb-4" role="alert">
-            <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            <span><?= htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8') ?></span>
-        </div>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: <?= json_encode($flashError) ?>,
+            confirmButtonColor: '#1168D9',
+            confirmButtonText: 'Aceptar'
+        });
         <?php endif; ?>
 
         <?php if ($flashInfo = Session::getFlash('info')): ?>
-        <div class="flex items-start gap-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg px-4 py-3 mb-4" role="alert">
-            <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span><?= htmlspecialchars($flashInfo, ENT_QUOTES, 'UTF-8') ?></span>
-        </div>
+        Swal.fire({
+            icon: 'info',
+            title: 'Información',
+            text: <?= json_encode($flashInfo) ?>,
+            confirmButtonColor: '#1168D9',
+            confirmButtonText: 'Aceptar'
+        });
         <?php endif; ?>
-    </div>
+    });
+    </script>
 
     <!-- Contenido de la vista -->
     <main class="flex-1 px-4 sm:px-6 pb-8">

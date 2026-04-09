@@ -43,13 +43,14 @@ class Pdf
         @mkdir($tempDir, 0755, true);
 
         $options = new Options();
-        $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('defaultFont', 'sans-serif');
         $options->set('isRemoteEnabled', false);
         $options->set('isHtml5ParserEnabled', true);
         $options->set('chroot', PUBLIC_PATH);
         $options->set('fontCache', $fontCache);
         $options->set('tempDir', $tempDir);
         $options->set('logOutputFile', $tempDir . '/dompdf.log');
+        $options->set('isFontSubsettingEnabled', false);
 
         $dompdf = new Dompdf($options);
 

@@ -204,7 +204,7 @@ class SubmissionModel extends BaseModel
             'form_id'       => $formId,
             'event_id'      => $eventId,
             'response_data' => json_encode($responseData, JSON_UNESCAPED_UNICODE),
-            'status'        => 'pending',
+            'status'        => 'confirmed',
             'ip_address'    => $ip,
             'user_agent'    => substr($userAgent, 0, 500),
         ]);

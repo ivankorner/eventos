@@ -117,8 +117,9 @@ $statusColors = ['published' => 'bg-green-100 text-green-800', 'draft' => 'bg-gr
                             <hr class="my-1 border-gray-100">
                             <!-- Eliminar -->
                             <form action="<?= APP_URL ?>/admin/eventos/<?= $ev['id'] ?>/eliminar" method="POST"
-                                  onsubmit="return confirm('¿Seguro que querés eliminar este evento? No se puede deshacer.')">
+                                  class="delete-event-form">
                                 <?= Csrf::field() ?>
+                                <input type="hidden" name="event_id" value="<?= $ev['id'] ?>">
                                 <button type="submit" class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50">Eliminar evento</button>
                             </form>
                         </div>
@@ -134,3 +135,30 @@ $statusColors = ['published' => 'bg-green-100 text-green-800', 'draft' => 'bg-gr
 
     <?= $paginator->render() ?>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteEventForms = document.querySelectorAll('.delete-event-form');
+
+    deleteEventForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: '¿Seguro que querés eliminar este evento?',
+                text: 'No se puede deshacer esta acción.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+</script>

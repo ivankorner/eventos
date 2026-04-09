@@ -92,8 +92,7 @@ $tableFields = array_slice($formFields, 0, 6);
                        class="text-xs text-color-secondary hover:underline mr-2">Ver</a>
                     <a href="<?= APP_URL ?>/admin/inscripciones/<?= $sub['id'] ?>/exportar/pdf"
                        class="text-xs text-gray-500 hover:underline mr-2">PDF</a>
-                    <form action="<?= APP_URL ?>/admin/inscripciones/<?= $sub['id'] ?>/eliminar" method="POST" class="inline"
-                          onsubmit="return confirm('¿Eliminar esta inscripción?')">
+                    <form action="<?= APP_URL ?>/admin/inscripciones/<?= $sub['id'] ?>/eliminar" method="POST" class="inline delete-submission-form">
                         <?= Csrf::field() ?>
                         <button type="submit" class="text-xs text-red-500 hover:underline">Eliminar</button>
                     </form>
@@ -112,3 +111,30 @@ $tableFields = array_slice($formFields, 0, 6);
         <a href="<?= APP_URL ?>/admin/eventos/<?= $event['id'] ?>/editar" class="text-sm text-gray-500 hover:text-gray-700">← Volver al evento</a>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteSubmissionForms = document.querySelectorAll('.delete-submission-form');
+
+    deleteSubmissionForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: '¿Eliminar esta inscripción?',
+                text: 'No se puede deshacer esta acción.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+</script>

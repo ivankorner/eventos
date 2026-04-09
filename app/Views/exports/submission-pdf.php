@@ -5,7 +5,7 @@
     <title>Inscripción #<?= (int)$submission['id'] ?></title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1f2937; line-height: 1.6; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #1f2937; line-height: 1.6; }
         .header { background: #4f46e5; color: white; padding: 20px 25px; margin-bottom: 20px; }
         .header h1 { font-size: 18px; margin-bottom: 4px; }
         .header p { font-size: 10px; opacity: 0.8; }

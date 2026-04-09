@@ -5,7 +5,7 @@
     <title>Inscripciones — <?= htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8') ?></title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #1f2937; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #1f2937; }
         .header { background: #4f46e5; color: white; padding: 16px 20px; margin-bottom: 16px; }
         .header h1 { font-size: 16px; }
         .header p { font-size: 9px; opacity: 0.8; margin-top: 4px; }
