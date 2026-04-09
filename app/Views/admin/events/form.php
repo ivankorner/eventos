@@ -44,12 +44,20 @@ function fieldVal(array $old, array|null $event, string $field, mixed $default =
                     <label class="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
                     <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-color-light">
                         <span class="px-3 py-2 bg-gray-50 text-gray-400 text-sm border-r border-gray-300">/evento/</span>
-                        <input type="text" name="slug"
+                        <input type="text" name="slug" id="slugInput"
                                value="<?= fieldVal($old, $event, 'slug') ?>"
                                class="flex-1 px-3 py-2 text-sm outline-none"
                                placeholder="se-genera-automaticamente">
                     </div>
                     <p class="text-xs text-gray-400 mt-1">Si lo dejás vacío, se genera desde el título.</p>
+
+                    <!-- URL Preview -->
+                    <div class="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <p class="text-xs text-blue-600 font-medium mb-1">URL final:</p>
+                        <p class="text-sm text-blue-800 font-mono break-all" id="urlPreview">
+                            <?= APP_URL ?>/evento/<?= fieldVal($old, $event, 'slug') ?: 'se-generara-desde-el-titulo' ?>
+                        </p>
+                    </div>
                 </div>
 
                 <div>
@@ -179,3 +187,50 @@ function fieldVal(array $old, array|null $event, string $field, mixed $default =
     </div>
     <?php endif; ?>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.querySelector('input[name="title"]');
+    const slugInput = document.getElementById('slugInput');
+    const urlPreview = document.getElementById('urlPreview');
+    const appUrl = '<?= APP_URL ?>';
+
+    function generateSlug(text) {
+        return text
+            .toLowerCase()
+            .trim()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    function updateUrlPreview() {
+        let slug = slugInput.value.trim();
+
+        if (!slug && titleInput.value.trim()) {
+            slug = generateSlug(titleInput.value);
+            urlPreview.textContent = appUrl + '/evento/' + slug;
+        } else if (slug) {
+            urlPreview.textContent = appUrl + '/evento/' + slug;
+        } else {
+            urlPreview.textContent = appUrl + '/evento/se-generara-desde-el-titulo';
+        }
+    }
+
+    // Auto-generate slug from title if slug is empty
+    titleInput.addEventListener('input', function() {
+        if (!slugInput.value.trim()) {
+            updateUrlPreview();
+        }
+    });
+
+    // Update preview when slug changes
+    slugInput.addEventListener('input', updateUrlPreview);
+
+    // Initial update
+    updateUrlPreview();
+});
+</script>
