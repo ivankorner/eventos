@@ -108,6 +108,9 @@ class UserController
 
         AuditLogModel::log('user.created', 'User', $userId, ['email' => $_POST['email']]);
 
+        // Procesar cola de emails al final del request
+        Email::processQueue(5);
+
         Session::flash('success', "Usuario creado. La contraseña temporal es: <code>{$tempPassword}</code> (también se envió por email).");
         header('Location: ' . APP_URL . '/admin/usuarios');
         exit;
@@ -134,6 +137,34 @@ class UserController
         AuditLogModel::log('user.toggled', 'User', $id);
 
         Session::flash('success', 'Estado del usuario actualizado.');
+        header('Location: ' . APP_URL . '/admin/usuarios');
+        exit;
+    }
+
+    /**
+     * POST /admin/usuarios/{id}/eliminar
+     */
+    public function delete(array $params = []): void
+    {
+        Csrf::verify();
+
+        $id   = (int)$params['id'];
+        $user = Session::user();
+
+        // No puede eliminarse a sí mismo
+        if ($id === $user['id']) {
+            Session::flash('error', 'No podés eliminar tu propia cuenta.');
+            header('Location: ' . APP_URL . '/admin/usuarios');
+            exit;
+        }
+
+        // Obtener datos del usuario antes de eliminarlo (para el log)
+        $deletedUser = $this->userModel->find($id);
+
+        $this->userModel->delete($id);
+        AuditLogModel::log('user.deleted', 'User', $id, ['email' => $deletedUser['email']]);
+
+        Session::flash('success', 'Usuario eliminado correctamente.');
         header('Location: ' . APP_URL . '/admin/usuarios');
         exit;
     }
