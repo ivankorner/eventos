@@ -245,6 +245,7 @@ class EventController
             'end_date'         => $_POST['end_date'] ?? null,
             'max_capacity'     => !empty($_POST['max_capacity']) ? (int)$_POST['max_capacity'] : null,
             'status'           => $_POST['status'] ?? 'draft',
+            'visibility'       => $_POST['visibility'] ?? 'public',
             'notify_email'     => trim($_POST['notify_email'] ?? ''),
             'meta_description' => trim($_POST['meta_description'] ?? ''),
         ];
@@ -256,7 +257,8 @@ class EventController
         $v->required('title', 'título')
           ->maxLength('title', 255, 'título')
           ->email('notify_email', 'email de notificación')
-          ->in('status', ['draft', 'published', 'finished'], 'estado');
+          ->in('status', ['draft', 'published', 'finished'], 'estado')
+          ->in('visibility', ['public', 'private'], 'visibilidad');
 
         return $v;
     }

@@ -62,6 +62,15 @@ function fieldVal(array $old, array|null $event, string $field, mixed $default =
                 </div>
 
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Visibilidad</label>
+                    <select name="visibility" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-color-light">
+                        <option value="public"  <?= (($old['visibility'] ?? $event['visibility'] ?? 'public') === 'public')  ? 'selected' : '' ?>>Público - Visible en landing page</option>
+                        <option value="private" <?= (($old['visibility'] ?? $event['visibility'] ?? 'public') === 'private') ? 'selected' : '' ?>>Privado - Solo con enlace directo</option>
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">Los eventos privados no aparecen en la landing page, pero pueden ser accedidos por enlace directo para inscripciones.</p>
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Fecha y hora de inicio</label>
                     <input type="datetime-local" name="start_date"
                            value="<?= fieldVal($old, $event, 'start_date') ?>"

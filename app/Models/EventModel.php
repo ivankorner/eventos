@@ -9,6 +9,7 @@ class EventModel extends BaseModel
 
     /**
      * Eventos publicados (página pública), con paginación
+     * Solo muestra eventos con visibility = 'public'
      */
     public function getPublished(int $limit, int $offset): array
     {
@@ -17,7 +18,7 @@ class EventModel extends BaseModel
                     (SELECT COUNT(*) FROM submissions s WHERE s.event_id = e.id AND s.deleted_at IS NULL) AS total_submissions,
                     (SELECT COUNT(*) FROM forms f WHERE f.event_id = e.id AND f.is_active = 1 LIMIT 1) AS has_form
              FROM events e
-             WHERE e.status = 'published' AND e.deleted_at IS NULL
+             WHERE e.status = 'published' AND e.visibility = 'public' AND e.deleted_at IS NULL
              ORDER BY e.start_date ASC
              LIMIT :limit OFFSET :offset",
             [':limit' => $limit, ':offset' => $offset]
@@ -30,7 +31,7 @@ class EventModel extends BaseModel
     public function countPublished(): int
     {
         return (int) $this->db->query(
-            "SELECT COUNT(*) FROM events WHERE status = 'published' AND deleted_at IS NULL"
+            "SELECT COUNT(*) FROM events WHERE status = 'published' AND visibility = 'public' AND deleted_at IS NULL"
         )->fetchColumn();
     }
 
@@ -133,12 +134,12 @@ class EventModel extends BaseModel
     public function getDashboardMetrics(): array
     {
         return [
-            'active_events'   => (int) $this->db->query("SELECT COUNT(*) FROM events WHERE status = 'published' AND deleted_at IS NULL")->fetchColumn(),
+            'active_events'   => (int) $this->db->query("SELECT COUNT(*) FROM events WHERE status = 'published' AND visibility = 'public' AND deleted_at IS NULL")->fetchColumn(),
             'total_events'    => (int) $this->db->query("SELECT COUNT(*) FROM events WHERE deleted_at IS NULL")->fetchColumn(),
             'total_submissions' => (int) $this->db->query("SELECT COUNT(*) FROM submissions WHERE deleted_at IS NULL")->fetchColumn(),
             'week_submissions'  => (int) $this->db->query("SELECT COUNT(*) FROM submissions WHERE deleted_at IS NULL AND submitted_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn(),
             'expiring_soon'   => $this->query(
-                "SELECT id, title, slug, end_date FROM events WHERE status = 'published' AND deleted_at IS NULL AND end_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 3 DAY)",
+                "SELECT id, title, slug, end_date FROM events WHERE status = 'published' AND visibility = 'public' AND deleted_at IS NULL AND end_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 3 DAY)",
                 []
             ),
         ];
@@ -198,6 +199,7 @@ class EventModel extends BaseModel
             'end_date'         => $event['end_date'],
             'max_capacity'     => $event['max_capacity'],
             'status'           => 'draft',
+            'visibility'       => $event['visibility'] ?? 'public',
             'notify_email'     => $event['notify_email'],
             'meta_description' => $event['meta_description'],
         ]);
