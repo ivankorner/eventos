@@ -23,7 +23,7 @@ function eventStatusColor(string $s): string {
         <div class="absolute inset-0 opacity-10 bg-cover bg-center" style="background-image:url('<?= APP_URL ?>/<?= htmlspecialchars($settings['hero_image'], ENT_QUOTES, 'UTF-8') ?>')"></div>
         <?php endif; ?>
         <h1 class="text-4xl sm:text-5xl font-bold mb-4 relative">
-            <?= htmlspecialchars($settings['hero_title'] ?? APP_NAME, ENT_QUOTES, 'UTF-8') ?>
+            <?= htmlspecialchars($settings['hero_title'] ?? ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?>
         </h1>
         <p class="text-xl text-color-lighter relative">
             <?= htmlspecialchars($settings['hero_subtitle'] ?? '', ENT_QUOTES, 'UTF-8') ?>

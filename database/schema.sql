@@ -200,6 +200,7 @@ INSERT INTO `settings` (`key_name`, `value_data`) VALUES
 ('hero_title',     'Bienvenido a nuestros eventos'),
 ('hero_subtitle',  'Explorá y registrate en los próximos eventos'),
 ('hero_image',     ''),
+('footer_text',    ''),
 ('smtp_configured','0'),
 ('session_lifetime','7200'),
 ('login_max_attempts','5'),

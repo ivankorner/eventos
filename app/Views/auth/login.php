@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sesión — <?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?></title>
+    <title>Iniciar sesión — <?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
@@ -41,7 +41,7 @@
 <div class="w-full max-w-md">
     <!-- Logo / Título -->
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-white"><?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?></h1>
+        <h1 class="text-3xl font-bold text-white"><?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?></h1>
         <p class="text-color-light mt-1">Panel administrativo</p>
     </div>
 

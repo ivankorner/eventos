@@ -30,7 +30,7 @@
 
 <div class="header">
     <h1>Comprobante de Inscripción</h1>
-    <p><?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?> &bull; Generado el <?= date('d/m/Y \a \l\a\s H:i') ?></p>
+    <p><?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?> &bull; Generado el <?= date('d/m/Y \a \l\a\s H:i') ?></p>
 </div>
 
 <div class="section">
@@ -107,7 +107,7 @@
 </div>
 
 <div class="footer">
-    <span><?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?></span>
+    <span><?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?></span>
     <span>Inscripción #<?= (int)$submission['id'] ?></span>
 </div>
 

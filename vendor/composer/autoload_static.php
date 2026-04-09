@@ -160,6 +160,7 @@ class ComposerStaticInit2500599cbdf2113f47788ed020a4dbf5
         'Composer\\Pcre\\Regex' => __DIR__ . '/..' . '/composer/pcre/src/Regex.php',
         'Composer\\Pcre\\ReplaceResult' => __DIR__ . '/..' . '/composer/pcre/src/ReplaceResult.php',
         'Composer\\Pcre\\UnexpectedNullMatchException' => __DIR__ . '/..' . '/composer/pcre/src/UnexpectedNullMatchException.php',
+        'ConfigHelper' => __DIR__ . '/../..' . '/app/Helpers/ConfigHelper.php',
         'Csrf' => __DIR__ . '/../..' . '/app/Helpers/Csrf.php',
         'CsrfMiddleware' => __DIR__ . '/../..' . '/app/Middleware/CsrfMiddleware.php',
         'DashboardController' => __DIR__ . '/../..' . '/app/Controllers/DashboardController.php',

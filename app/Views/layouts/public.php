@@ -87,7 +87,10 @@
 <!-- Footer -->
 <footer class="bg-color-primary text-color-lighter py-8 mt-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-        <p class="text-sm"><?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?> &copy; <?= date('Y') ?></p>
+        <p class="text-sm"><?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?> &copy; <?= date('Y') ?></p>
+        <?php if (!empty($footerText)): ?>
+        <p class="text-sm mt-2"><?= htmlspecialchars($footerText, ENT_QUOTES, 'UTF-8') ?></p>
+        <?php endif; ?>
     </div>
 </footer>
 

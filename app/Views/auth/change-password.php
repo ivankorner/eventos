@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cambiar contraseña — <?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?></title>
+    <title>Cambiar contraseña — <?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Whitebird Bank Color Palette */
@@ -38,7 +38,7 @@
 <body class="bg-color-primary min-h-screen flex items-center justify-center p-4">
 <div class="w-full max-w-md">
     <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-white"><?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?></h1>
+        <h1 class="text-2xl font-bold text-white"><?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?></h1>
     </div>
 
     <div class="bg-white rounded-2xl shadow-2xl p-8">

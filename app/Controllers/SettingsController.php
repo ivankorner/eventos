@@ -10,6 +10,11 @@ class SettingsController
      */
     public function index(array $params = []): void
     {
+        // Evitar caché del navegador
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
         $db = Database::getInstance();
         $stmt = $db->query("SELECT key_name, value_data FROM settings");
         $rows = $stmt->fetchAll();
@@ -35,7 +40,7 @@ class SettingsController
         Csrf::verify();
 
         $db     = Database::getInstance();
-        $fields = ['app_name', 'hero_title', 'hero_subtitle'];
+        $fields = ['app_name', 'hero_title', 'hero_subtitle', 'footer_text'];
 
         foreach ($fields as $key) {
             if (isset($_POST[$key])) {
@@ -90,8 +95,8 @@ class SettingsController
             Email::send(
                 $toEmail,
                 'Destinatario de prueba',
-                'Email de prueba — ' . APP_NAME,
-                '<h2>Email de prueba</h2><p>Si recibís este email, la configuración SMTP es correcta.</p><p>— ' . APP_NAME . '</p>'
+                'Email de prueba — ' . ConfigHelper::getAppName(),
+                '<h2>Email de prueba</h2><p>Si recibís este email, la configuración SMTP es correcta.</p><p>— ' . ConfigHelper::getAppName() . '</p>'
             );
             Session::flash('success', "Email de prueba enviado a {$toEmail} correctamente.");
         } catch (\RuntimeException $e) {

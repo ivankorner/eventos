@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'Admin', ENT_QUOTES, 'UTF-8') ?> — <?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?></title>
+    <title><?= htmlspecialchars($pageTitle ?? 'Admin', ENT_QUOTES, 'UTF-8') ?> — <?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
@@ -77,7 +77,7 @@
     <!-- Logo / nombre -->
     <div class="flex items-center justify-between px-6 py-5 border-b border-color-secondary">
         <a href="<?= APP_URL ?>/admin/dashboard" class="text-xl font-bold text-white truncate">
-            <?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?>
+            <?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?>
         </a>
         <button @click="sidebarOpen = false" class="lg:hidden text-color-light hover:text-white">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -217,7 +217,7 @@
     </main>
 
     <footer class="text-center text-xs text-gray-400 py-4 border-t">
-        <?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?> &copy; <?= date('Y') ?>
+        <?= htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8') ?> &copy; <?= date('Y') ?>
     </footer>
 </div>
 

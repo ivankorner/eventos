@@ -33,6 +33,7 @@ return array(
     'Composer\\Pcre\\Regex' => $vendorDir . '/composer/pcre/src/Regex.php',
     'Composer\\Pcre\\ReplaceResult' => $vendorDir . '/composer/pcre/src/ReplaceResult.php',
     'Composer\\Pcre\\UnexpectedNullMatchException' => $vendorDir . '/composer/pcre/src/UnexpectedNullMatchException.php',
+    'ConfigHelper' => $baseDir . '/app/Helpers/ConfigHelper.php',
     'Csrf' => $baseDir . '/app/Helpers/Csrf.php',
     'CsrfMiddleware' => $baseDir . '/app/Middleware/CsrfMiddleware.php',
     'DashboardController' => $baseDir . '/app/Controllers/DashboardController.php',

@@ -114,7 +114,7 @@ class Email
      */
     public static function buildWelcomeHtml(array $user, string $tempPassword): string
     {
-        $appName = htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8');
+        $appName = htmlspecialchars(ConfigHelper::getAppName(), ENT_QUOTES, 'UTF-8');
         $name    = htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8');
         $email   = htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8');
         $pass    = htmlspecialchars($tempPassword, ENT_QUOTES, 'UTF-8');

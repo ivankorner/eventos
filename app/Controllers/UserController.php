@@ -99,7 +99,7 @@ class UserController
             Email::queue(
                 $newUser['email'],
                 $newUser['name'],
-                'Bienvenido/a a ' . APP_NAME,
+                'Bienvenido/a a ' . ConfigHelper::getAppName(),
                 $html
             );
         } catch (\Throwable $e) {

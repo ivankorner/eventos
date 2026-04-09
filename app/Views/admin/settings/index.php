@@ -24,6 +24,13 @@
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-color-light">
             </div>
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Frase en el footer</label>
+                <input type="text" name="footer_text"
+                       value="<?= htmlspecialchars($settings['footer_text'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                       placeholder="Ej: Todos los derechos reservados © 2026"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-color-light">
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Logo del sistema</label>
                 <?php if (!empty($settings['app_logo'])): ?>
                 <div class="mb-2">

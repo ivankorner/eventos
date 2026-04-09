@@ -33,10 +33,11 @@ class PublicController
         $settings = $this->getSettings();
 
         $this->render('public/index', [
-            'events'    => $events,
-            'paginator' => $pag,
-            'settings'  => $settings,
-            'pageTitle' => $settings['hero_title'] ?? APP_NAME,
+            'events'      => $events,
+            'paginator'   => $pag,
+            'settings'    => $settings,
+            'footerText'  => $settings['footer_text'] ?? '',
+            'pageTitle'   => $settings['hero_title'] ?? APP_NAME,
         ]);
     }
 
@@ -69,11 +70,15 @@ class PublicController
         $isExpired = $event['end_date'] && strtotime($event['end_date']) < $now;
         $canSubmit = $form && $form['is_active'] && !$isFull && !$isExpired && $event['status'] === 'published';
 
+        // Configuración global del sistema
+        $globalSettings = $this->getSettings();
+
         $this->render('public/event', [
             'event'       => $event,
             'form'        => $form,
             'formFields'  => $formFields,
             'formSettings'=> $settings,
+            'footerText'  => $globalSettings['footer_text'] ?? '',
             'isFull'      => $isFull,
             'isExpired'   => $isExpired,
             'canSubmit'   => $canSubmit,
@@ -230,10 +235,13 @@ class PublicController
      */
     public function confirmation(array $params = []): void
     {
+        $globalSettings = $this->getSettings();
+
         $this->render('public/success', [
             'successMessage' => Session::getFlash('success_message') ?? '¡Tu inscripción fue recibida!',
             'eventTitle'     => Session::getFlash('event_title') ?? '',
             'slug'           => $_GET['event'] ?? '',
+            'footerText'     => $globalSettings['footer_text'] ?? '',
             'pageTitle'      => 'Inscripción confirmada',
         ], 'public');
     }
