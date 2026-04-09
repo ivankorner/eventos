@@ -50,13 +50,21 @@ $currentUser = Session::user();
                 </td>
                 <td class="px-5 py-3 text-right">
                     <?php if ($u['id'] !== $currentUser['id']): ?>
-                    <form action="<?= APP_URL ?>/admin/usuarios/<?= $u['id'] ?>/activar" method="POST" class="inline">
-                        <?= Csrf::field() ?>
-                        <button type="submit"
-                                class="text-xs <?= $u['is_active'] ? 'text-red-500' : 'text-green-600' ?> hover:underline">
-                            <?= $u['is_active'] ? 'Desactivar' : 'Activar' ?>
-                        </button>
-                    </form>
+                    <div class="flex gap-3 justify-end">
+                        <form action="<?= APP_URL ?>/admin/usuarios/<?= $u['id'] ?>/activar" method="POST" class="inline">
+                            <?= Csrf::field() ?>
+                            <button type="submit"
+                                    class="text-xs <?= $u['is_active'] ? 'text-red-500' : 'text-green-600' ?> hover:underline">
+                                <?= $u['is_active'] ? 'Desactivar' : 'Activar' ?>
+                            </button>
+                        </form>
+                        <form action="<?= APP_URL ?>/admin/usuarios/<?= $u['id'] ?>/eliminar" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro de que querés eliminar este usuario? Esta acción no se puede deshacer.');">
+                            <?= Csrf::field() ?>
+                            <button type="submit" class="text-xs text-red-600 hover:underline">
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
                     <?php else: ?>
                     <span class="text-xs text-gray-300">Vos mismo</span>
                     <?php endif; ?>

@@ -128,4 +128,15 @@ class UserModel extends BaseModel
             [':id' => $id]
         );
     }
+
+    /**
+     * Elimina un usuario del sistema
+     */
+    public function delete(int $id): bool
+    {
+        return (bool) $this->execute(
+            "DELETE FROM users WHERE id = :id",
+            [':id' => $id]
+        );
+    }
 }

@@ -66,6 +66,7 @@ $router->group('/admin', [AuthMiddleware::class], function (GroupRouter $r) {
     $r->get('/usuarios/crear',       [UserController::class, 'create'],      [SuperAdminMiddleware::class]);
     $r->post('/usuarios/crear',      [UserController::class, 'store'],       [SuperAdminMiddleware::class]);
     $r->post('/usuarios/{id}/activar',[UserController::class, 'toggleActive'],[SuperAdminMiddleware::class]);
+    $r->post('/usuarios/{id}/eliminar',[UserController::class, 'delete'],    [SuperAdminMiddleware::class]);
 
     // ---- Configuración (solo super_admin) ----
     $r->get('/configuracion',              [SettingsController::class, 'index'],    [SuperAdminMiddleware::class]);
