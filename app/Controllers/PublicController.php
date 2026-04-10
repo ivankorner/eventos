@@ -194,17 +194,20 @@ class PublicController
         $subId = $this->subModel->create($form['id'], $event['id'], $responseData, $ip, $ua);
 
         // Enviar email de confirmación al inscripto
+        $emailSent = false;
         if ($emailField && !empty($responseData[$emailField])) {
             try {
+                $toEmail = $responseData[$emailField];
                 $html = Email::buildConfirmationHtml($event, $formFields, $responseData);
                 Email::queue(
-                    $responseData[$emailField],
+                    $toEmail,
                     $responseData[array_keys($responseData)[0]] ?? 'Inscripto/a',
                     'Confirmación de inscripción — ' . $event['title'],
                     $html
                 );
+                $emailSent = true;
             } catch (\Throwable $e) {
-                ErrorHandler::log('Error encolando confirmación: ' . $e->getMessage());
+                ErrorHandler::log('Error encolando confirmación a ' . ($toEmail ?? 'desconocido') . ': ' . $e->getMessage());
             }
         }
 
@@ -215,12 +218,19 @@ class PublicController
                 $html = Email::buildNotificationHtml($event, $formFields, $responseData, date('d/m/Y H:i'), $ip);
                 Email::queue($notifyEmail, 'Organizador', 'Nueva inscripción — ' . $event['title'], $html);
             } catch (\Throwable $e) {
-                ErrorHandler::log('Error encolando notificación al organizador: ' . $e->getMessage());
+                ErrorHandler::log('Error encolando notificación al organizador ' . $notifyEmail . ': ' . $e->getMessage());
             }
         }
 
         // Procesar cola de emails al final del request
-        Email::processQueue(5);
+        try {
+            $result = Email::processQueue(10);
+            if ($result['failed'] > 0) {
+                ErrorHandler::log("Emails fallidos durante procesamiento: {$result['failed']}");
+            }
+        } catch (\Throwable $e) {
+            ErrorHandler::log('Error procesando cola de emails: ' . $e->getMessage());
+        }
 
         $successMsg = $formSettings['success_message'] ?? '¡Gracias! Tu inscripción fue recibida.';
         Session::flash('success_message', $successMsg);

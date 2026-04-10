@@ -81,29 +81,45 @@ class Email
         $sent = 0;
         $fail = 0;
 
-        $stmt = $db->prepare(
-            "SELECT * FROM mail_queue WHERE status = 'pending' AND attempts < 3 ORDER BY created_at ASC LIMIT :limit"
-        );
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        $mails = $stmt->fetchAll();
+        try {
+            $stmt = $db->prepare(
+                "SELECT * FROM mail_queue WHERE status = 'pending' AND attempts < 3 ORDER BY created_at ASC LIMIT :limit"
+            );
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            $mails = $stmt->fetchAll();
 
-        foreach ($mails as $mail) {
-            try {
-                self::send($mail['to_email'], $mail['to_name'] ?? '', $mail['subject'], $mail['body_html']);
-
-                $db->prepare(
-                    "UPDATE mail_queue SET status = 'sent', sent_at = NOW() WHERE id = :id"
-                )->execute([':id' => $mail['id']]);
-
-                $sent++;
-            } catch (\RuntimeException $e) {
-                $db->prepare(
-                    "UPDATE mail_queue SET attempts = attempts + 1, status = IF(attempts >= 2, 'failed', 'pending') WHERE id = :id"
-                )->execute([':id' => $mail['id']]);
-
-                $fail++;
+            if (empty($mails)) {
+                return ['sent' => 0, 'failed' => 0];
             }
+
+            foreach ($mails as $mail) {
+                try {
+                    self::send($mail['to_email'], $mail['to_name'] ?? '', $mail['subject'], $mail['body_html']);
+
+                    $db->prepare(
+                        "UPDATE mail_queue SET status = 'sent', sent_at = NOW() WHERE id = :id"
+                    )->execute([':id' => $mail['id']]);
+
+                    $sent++;
+                } catch (\RuntimeException $e) {
+                    $db->prepare(
+                        "UPDATE mail_queue SET attempts = attempts + 1, status = IF(attempts >= 2, 'failed', 'pending') WHERE id = :id"
+                    )->execute([':id' => $mail['id']]);
+
+                    $fail++;
+                    ErrorHandler::log("Error enviando email a {$mail['to_email']}: " . $e->getMessage());
+                } catch (\Throwable $e) {
+                    $db->prepare(
+                        "UPDATE mail_queue SET attempts = attempts + 1 WHERE id = :id"
+                    )->execute([':id' => $mail['id']]);
+
+                    $fail++;
+                    ErrorHandler::log("Error inesperado procesando email {$mail['id']}: " . $e->getMessage());
+                }
+            }
+        } catch (\Throwable $e) {
+            ErrorHandler::log("Error crítico procesando cola: " . $e->getMessage());
         }
 
         return ['sent' => $sent, 'failed' => $fail];
