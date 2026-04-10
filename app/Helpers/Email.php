@@ -153,8 +153,45 @@ class Email
      */
     public static function buildConfirmationHtml(array $event, array $formFields, array $responseData): string
     {
-        $appName   = htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8');
-        $eventTitle = htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8');
+        $appName      = htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8');
+        $eventTitle   = htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8');
+        $eventDesc    = htmlspecialchars($event['description'] ?? '', ENT_QUOTES, 'UTF-8');
+        $startDate    = $event['start_date'] ? date('d/m/Y', strtotime($event['start_date'])) : '';
+        $endDate      = $event['end_date'] ? date('d/m/Y', strtotime($event['end_date'])) : '';
+        $location     = htmlspecialchars($event['location'] ?? '', ENT_QUOTES, 'UTF-8');
+
+        // Imagen de portada
+        $coverImageHtml = '';
+        if (!empty($event['cover_image'])) {
+            $coverImageUrl = htmlspecialchars(APP_URL . '/' . $event['cover_image'], ENT_QUOTES, 'UTF-8');
+            $coverImageHtml = "<img src='{$coverImageUrl}' alt='{$eventTitle}' style='width:100%;max-width:600px;height:auto;display:block;margin:0 auto;border-radius:8px;margin-bottom:20px'>";
+        }
+
+        // Detalles del evento
+        $eventDetailsHtml = '';
+        if ($startDate || $endDate || $location || $eventDesc) {
+            $eventDetailsHtml = "<div style='background:#f9f9f9;border-left:4px solid #4f46e5;padding:15px;margin:20px 0;border-radius:4px'>";
+
+            if ($eventTitle) {
+                $eventDetailsHtml .= "<h3 style='margin:0 0 10px 0;color:#1f2937'>{$eventTitle}</h3>";
+            }
+
+            if ($startDate) {
+                $eventDetailsHtml .= "<p style='margin:5px 0;color:#4b5563'><strong>📅 Fecha de inicio:</strong> {$startDate}</p>";
+            }
+            if ($endDate) {
+                $eventDetailsHtml .= "<p style='margin:5px 0;color:#4b5563'><strong>📅 Fecha de fin:</strong> {$endDate}</p>";
+            }
+            if ($location) {
+                $eventDetailsHtml .= "<p style='margin:5px 0;color:#4b5563'><strong>📍 Ubicación:</strong> {$location}</p>";
+            }
+            if ($eventDesc) {
+                $eventDetailsHtml .= "<p style='margin:10px 0 0 0;color:#6b7280;font-size:14px'>{$eventDesc}</p>";
+            }
+
+            $eventDetailsHtml .= "</div>";
+        }
+
         $rows = '';
 
         // Cruzar campo a campo con su label
@@ -181,10 +218,16 @@ class Email
               <h1 style="color:#fff;margin:0;font-size:24px">{$appName}</h1>
             </div>
             <div style="padding:30px">
-              <h2>¡Tu inscripción fue recibida!</h2>
-              <p>Gracias por inscribirte a <strong>{$eventTitle}</strong>. A continuación el resumen de tus datos:</p>
+              {$coverImageHtml}
+              <h2 style="margin:0 0 10px 0">¡Tu inscripción fue recibida!</h2>
+              <p style="margin:0 0 20px 0">Gracias por inscribirte a <strong>{$eventTitle}</strong>.</p>
+
+              {$eventDetailsHtml}
+
+              <h3 style="margin:25px 0 15px 0;color:#1f2937">Resumen de tu inscripción:</h3>
               <table style="width:100%;border-collapse:collapse;margin:20px 0">{$rows}</table>
-              <p style="color:#666;font-size:14px">Si tenés alguna consulta, respondé este email o contactá a los organizadores del evento.</p>
+
+              <p style="color:#666;font-size:14px;margin-top:20px">Si tenés alguna consulta, respondé este email o contactá a los organizadores del evento.</p>
             </div>
           </div>
         </body>
