@@ -300,7 +300,7 @@
 
 <!-- Datos para el constructor JS -->
 <script>
-    const FORM_BUILDER_DATA = {
+    window.FORM_BUILDER_DATA = {
         eventId:   <?= (int)$event['id'] ?>,
         saveUrl:   '<?= APP_URL ?>/admin/eventos/<?= (int)$event['id'] ?>/formulario/guardar',
         csrfToken: '<?= Csrf::token() ?>',
