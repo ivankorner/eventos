@@ -150,41 +150,17 @@ document.addEventListener('alpine:init', () => {
         setupDragFromTypesPanel() {
             const fieldTypeItems = document.querySelectorAll('.field-type-item');
             fieldTypeItems.forEach(item => {
-                // Click para agregar sin arrastrar
-                item.addEventListener('click', () => {
-                    this.addField(item.dataset.type);
+                // Remover listeners previos para evitar duplicados
+                const newItem = item.cloneNode(true);
+                item.parentNode.replaceChild(newItem, item);
+
+                // Agregar nuevo listener
+                newItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.addField(newItem.dataset.type);
                     this.$nextTick(() => this.setupSortableCanvas());
                 });
             });
-
-            // Drag from types panel to canvas using SortableJS
-            if (window.Sortable) {
-                new Sortable(document.getElementById('fieldTypes'), {
-                    group: {
-                        name:  'formCanvas',
-                        pull:  'clone',
-                        put:   false,
-                    },
-                    sort:      false,
-                    animation: 150,
-                    onEnd: (evt) => {
-                        if (evt.to.id === 'sortableCanvas') {
-                            const type  = evt.item.dataset.type;
-                            const index = evt.newIndex;
-
-                            // El SortableJS insertó el elemento clonado — eliminarlo y agregar el campo real
-                            evt.item.remove();
-
-                            const field = this.fieldDefaults(type);
-                            this.fields.splice(index, 0, field);
-                            this.updateOrder();
-                            this.selectedFieldId = field.id;
-
-                            this.$nextTick(() => this.setupSortableCanvas());
-                        }
-                    },
-                });
-            }
         },
 
         // -------------------------

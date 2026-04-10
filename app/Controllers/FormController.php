@@ -52,7 +52,14 @@ class FormController
      */
     public function save(array $params = []): void
     {
-        Csrf::verify();
+        // Verificar CSRF — para AJAX, retornar JSON
+        if (!Csrf::isValid()) {
+            if ($this->isAjax()) {
+                $this->jsonResponse(['success' => false, 'message' => 'Token CSRF inválido. Por favor, recargá la página.']);
+            }
+            http_response_code(419);
+            die('Token CSRF inválido. Por favor, recargá la página e intentá de nuevo.');
+        }
 
         $event = $this->findEventOrFail((int)$params['id']);
         $this->authorizeEvent($event);

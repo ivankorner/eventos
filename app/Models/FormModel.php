@@ -50,7 +50,7 @@ class FormModel extends BaseModel
             'event_id'   => $eventId,
             'title'      => $title,
             'fields_json' => $jsonStr,
-            'is_active'  => $activate ? 1 : 1, // Siempre activo al crear
+            'is_active'  => $activate ? 1 : 0,
         ]);
     }
 
