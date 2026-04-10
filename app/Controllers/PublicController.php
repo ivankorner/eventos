@@ -193,8 +193,7 @@ class PublicController
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $subId = $this->subModel->create($form['id'], $event['id'], $responseData, $ip, $ua);
 
-        // Enviar email de confirmación al inscripto
-        $emailSent = false;
+        // Enviar email de confirmación al inscripto (NO bloquea si falla)
         if ($emailField && !empty($responseData[$emailField])) {
             try {
                 $toEmail = $responseData[$emailField];
@@ -205,30 +204,32 @@ class PublicController
                     'Confirmación de inscripción — ' . $event['title'],
                     $html
                 );
-                $emailSent = true;
             } catch (\Throwable $e) {
+                // Log pero no bloquea la inscripción
                 ErrorHandler::log('Error encolando confirmación a ' . ($toEmail ?? 'desconocido') . ': ' . $e->getMessage());
             }
         }
 
-        // Enviar notificación al organizador
+        // Enviar notificación al organizador (NO bloquea si falla)
         $notifyEmail = $formSettings['notify_email'] ?? $event['notify_email'] ?? '';
         if ($notifyEmail) {
             try {
                 $html = Email::buildNotificationHtml($event, $formFields, $responseData, date('d/m/Y H:i'), $ip);
                 Email::queue($notifyEmail, 'Organizador', 'Nueva inscripción — ' . $event['title'], $html);
             } catch (\Throwable $e) {
+                // Log pero no bloquea
                 ErrorHandler::log('Error encolando notificación al organizador ' . $notifyEmail . ': ' . $e->getMessage());
             }
         }
 
-        // Procesar cola de emails al final del request
+        // Procesar cola de emails (con reintentos y fallback automático)
         try {
             $result = Email::processQueue(10);
             if ($result['failed'] > 0) {
                 ErrorHandler::log("Emails fallidos durante procesamiento: {$result['failed']}");
             }
         } catch (\Throwable $e) {
+            // Log pero no bloquea la inscripción
             ErrorHandler::log('Error procesando cola de emails: ' . $e->getMessage());
         }
 

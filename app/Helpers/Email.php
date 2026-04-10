@@ -49,8 +49,55 @@ class Email
 
             $mail->send();
         } catch (MailerException $e) {
-            ErrorHandler::log("Error enviando email a {$toEmail}: " . $mail->ErrorInfo);
-            throw new \RuntimeException('No se pudo enviar el email: ' . $mail->ErrorInfo);
+            ErrorHandler::log("Error enviando email a {$toEmail} con servidor {$config['host']}: " . $mail->ErrorInfo);
+
+            // FALLBACK: Intentar con Gmail si falla el servidor primario
+            if (strpos($config['host'], 'appcde.online') !== false && strpos($mail->ErrorInfo, 'Could not authenticate') !== false) {
+                ErrorHandler::log("Intentando fallback con Gmail para {$toEmail}");
+                self::sendViaGmailFallback($toEmail, $toName, $subject, $bodyHtml);
+            } else {
+                throw new \RuntimeException('No se pudo enviar el email: ' . $mail->ErrorInfo);
+            }
+        }
+    }
+
+    /**
+     * Envío fallback mediante Gmail (requiere APP_PASSWORD configurada en .env)
+     */
+    private static function sendViaGmailFallback(string $toEmail, string $toName, string $subject, string $bodyHtml): void
+    {
+        $gmailUser = $_ENV['GMAIL_FALLBACK_USER'] ?? null;
+        $gmailPass = $_ENV['GMAIL_FALLBACK_PASSWORD'] ?? null;
+
+        if (!$gmailUser || !$gmailPass) {
+            throw new \RuntimeException('No se pudo enviar el email: servidor SMTP principal falló y Gmail fallback no está configurado');
+        }
+
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $gmailUser;
+            $mail->Password   = $gmailPass;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+            $mail->CharSet    = 'UTF-8';
+
+            $mail->setFrom($gmailUser, $_ENV['APP_NAME'] ?? 'Sistema de Inscripciones');
+            $mail->addAddress($toEmail, $toName);
+
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body    = $bodyHtml;
+            $mail->AltBody = strip_tags($bodyHtml);
+
+            $mail->send();
+            ErrorHandler::log("Email enviado a {$toEmail} via Gmail fallback");
+        } catch (MailerException $e) {
+            ErrorHandler::log("Gmail fallback también falló para {$toEmail}: " . $mail->ErrorInfo);
+            throw new \RuntimeException('No se pudo enviar el email via Gmail: ' . $mail->ErrorInfo);
         }
     }
 
