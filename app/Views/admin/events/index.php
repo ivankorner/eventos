@@ -75,15 +75,16 @@ $statusColors = ['published' => 'bg-green-100 text-green-800', 'draft' => 'bg-gr
                     <span class="text-gray-400 text-xs"> / <?= (int)$ev['max_capacity'] ?></span>
                     <?php endif; ?>
                 </td>
-                <td class="px-5 py-3 text-right" x-data="{ menuOpen: false }">
+                <td class="px-5 py-3 text-right" x-data="{ menuOpen: false, menuStyle: {} }">
                     <div class="relative inline-block">
-                        <button @click="menuOpen = !menuOpen" @click.outside="menuOpen = false"
+                        <button @click="menuOpen = !menuOpen; $nextTick(() => { const rect = $el.getBoundingClientRect(); menuStyle = { position: 'fixed', top: rect.bottom + 'px', right: (window.innerWidth - rect.right) + 'px', zIndex: 50 } })"
+                                @click.outside="menuOpen = false"
                                 class="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-600 hover:bg-gray-50 transition-colors">
                             Acciones
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
-                        <div x-show="menuOpen" x-cloak
-                             class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                        <div x-show="menuOpen" x-cloak :style="menuOpen ? menuStyle : {}"
+                             class="w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
                             <a href="<?= APP_URL ?>/admin/eventos/<?= $ev['id'] ?>/editar"
                                class="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50">Editar evento</a>
                             <a href="<?= APP_URL ?>/admin/eventos/<?= $ev['id'] ?>/formulario"
