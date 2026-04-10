@@ -194,6 +194,7 @@ class EventModel extends BaseModel
             'slug'             => $newSlug,
             'description'      => $event['description'],
             'cover_image'      => $event['cover_image'],
+            'thumbnail'        => $event['thumbnail'],
             'location'         => $event['location'],
             'start_date'       => $event['start_date'],
             'end_date'         => $event['end_date'],

@@ -72,10 +72,11 @@ function eventStatusColor(string $s): string {
         ?>
         <article class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow event-card"
                  data-status="<?= $evDataStatus ?>">
-            <!-- Imagen de portada -->
+            <!-- Imagen miniatura -->
             <div class="aspect-video bg-color-lighter overflow-hidden">
-                <?php if ($ev['cover_image']): ?>
-                <img src="<?= APP_URL ?>/<?= htmlspecialchars($ev['cover_image'], ENT_QUOTES, 'UTF-8') ?>"
+                <?php $cardImage = $ev['thumbnail'] ?: $ev['cover_image']; ?>
+                <?php if ($cardImage): ?>
+                <img src="<?= APP_URL ?>/<?= htmlspecialchars($cardImage, ENT_QUOTES, 'UTF-8') ?>"
                      alt="<?= htmlspecialchars($ev['title'], ENT_QUOTES, 'UTF-8') ?>"
                      class="w-full h-full object-cover">
                 <?php else: ?>

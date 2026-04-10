@@ -133,6 +133,7 @@ function fieldVal(array $old, array|null $event, string $field, mixed $default =
 
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Imagen de portada</label>
+                    <p class="text-xs text-gray-500 mb-2">Se muestra en el detalle del evento (banner principal).</p>
                     <?php if ($isEdit && !empty($event['cover_image'])): ?>
                     <div class="mb-3">
                         <img src="<?= APP_URL ?>/<?= htmlspecialchars($event['cover_image'], ENT_QUOTES, 'UTF-8') ?>"
@@ -144,6 +145,22 @@ function fieldVal(array $old, array|null $event, string $field, mixed $default =
                            class="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-color-lighter file:text-color-secondary hover:file:bg-color-lighter">
                     <p class="text-xs text-gray-400 mt-1">JPG, PNG o WebP. Máximo 20 MB.</p>
                     <?= fieldError($errors, 'cover_image') ?>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagen miniatura</label>
+                    <p class="text-xs text-gray-500 mb-2">Se muestra en la tarjeta del evento en la landing page.</p>
+                    <?php if ($isEdit && !empty($event['thumbnail'])): ?>
+                    <div class="mb-3">
+                        <img src="<?= APP_URL ?>/<?= htmlspecialchars($event['thumbnail'], ENT_QUOTES, 'UTF-8') ?>"
+                             alt="Miniatura actual" class="h-32 object-cover rounded-lg border border-gray-200">
+                        <p class="text-xs text-gray-400 mt-1">Imagen actual. Subí una nueva para reemplazarla.</p>
+                    </div>
+                    <?php endif; ?>
+                    <input type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp"
+                           class="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-color-lighter file:text-color-secondary hover:file:bg-color-lighter">
+                    <p class="text-xs text-gray-400 mt-1">JPG, PNG o WebP. Máximo 20 MB.</p>
+                    <?= fieldError($errors, 'thumbnail') ?>
                 </div>
             </div>
         </div>

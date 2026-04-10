@@ -91,6 +91,19 @@ class EventController
             }
         }
 
+        // Procesar imagen miniatura si se subió
+        if (!empty($_FILES['thumbnail']['name'])) {
+            try {
+                $uploaded = Upload::process($_FILES['thumbnail'], 'events', Upload::imageMimes(), 20 * 1024 * 1024);
+                $data['thumbnail'] = $uploaded['path'];
+            } catch (\RuntimeException $e) {
+                Session::flash('errors', ['thumbnail' => [$e->getMessage()]]);
+                Session::flash('old', $_POST);
+                header('Location: ' . APP_URL . '/admin/eventos/crear');
+                exit;
+            }
+        }
+
         $id = $this->eventModel->insert($data);
         AuditLogModel::log('event.created', 'Event', $id, ['title' => $data['title']]);
 
@@ -140,7 +153,7 @@ class EventController
         // Slug único excluyendo el evento actual
         $data['slug'] = Slug::unique($data['slug'] ?: $data['title'], 'events', $event['id']);
 
-        // Procesar nueva imagen si se subió
+        // Procesar nueva imagen de portada si se subió
         if (!empty($_FILES['cover_image']['name'])) {
             try {
                 $uploaded = Upload::process($_FILES['cover_image'], 'events', Upload::imageMimes(), 20 * 1024 * 1024);
@@ -158,6 +171,24 @@ class EventController
         } else {
             // Mantener imagen existente
             unset($data['cover_image']);
+        }
+
+        // Procesar nueva imagen miniatura si se subió
+        if (!empty($_FILES['thumbnail']['name'])) {
+            try {
+                $uploaded = Upload::process($_FILES['thumbnail'], 'events', Upload::imageMimes(), 20 * 1024 * 1024);
+                if ($event['thumbnail']) {
+                    Upload::delete($event['thumbnail']);
+                }
+                $data['thumbnail'] = $uploaded['path'];
+            } catch (\RuntimeException $e) {
+                Session::flash('errors', ['thumbnail' => [$e->getMessage()]]);
+                Session::flash('old', $_POST);
+                header('Location: ' . APP_URL . '/admin/eventos/' . $event['id'] . '/editar');
+                exit;
+            }
+        } else {
+            unset($data['thumbnail']);
         }
 
         $this->eventModel->update($event['id'], $data);
