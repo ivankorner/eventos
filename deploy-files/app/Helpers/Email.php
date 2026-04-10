@@ -34,6 +34,12 @@ class Email
             $mail->SMTPSecure  = $config['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port        = $config['port'];
             $mail->CharSet     = 'UTF-8';
+            $mail->Timeout     = 30;
+            $mail->SMTPKeepAlive = false;
+
+            // Log de configuración para diagnóstico (sin exponer password completo)
+            $maskedPass = substr($config['password'], 0, 3) . '***' . substr($config['password'], -2);
+            ErrorHandler::log("SMTP Config: host={$config['host']}, port={$config['port']}, user={$config['username']}, pass={$maskedPass}, encryption={$config['encryption']}");
 
             // Remitente
             $mail->setFrom($config['from_address'], $config['from_name']);
@@ -48,9 +54,61 @@ class Email
             $mail->AltBody = strip_tags($bodyHtml);
 
             $mail->send();
+            ErrorHandler::log("Email enviado exitosamente a {$toEmail} via {$config['host']}");
         } catch (MailerException $e) {
-            ErrorHandler::log("Error enviando email a {$toEmail}: " . $mail->ErrorInfo);
+            ErrorHandler::log("Error enviando email a {$toEmail} con servidor {$config['host']}: " . $mail->ErrorInfo);
+
+            // FALLBACK: Intentar con Gmail si falla el servidor primario
+            if (strpos($config['host'], 'appcde.online') !== false) {
+                ErrorHandler::log("Intentando fallback con Gmail para {$toEmail}");
+                try {
+                    self::sendViaGmailFallback($toEmail, $toName, $subject, $bodyHtml);
+                    return; // Gmail funcionó, salimos
+                } catch (\Throwable $gmailEx) {
+                    ErrorHandler::log("Gmail fallback también falló: " . $gmailEx->getMessage());
+                }
+            }
             throw new \RuntimeException('No se pudo enviar el email: ' . $mail->ErrorInfo);
+        }
+    }
+
+    /**
+     * Envío fallback mediante Gmail (requiere APP_PASSWORD configurada en .env)
+     */
+    private static function sendViaGmailFallback(string $toEmail, string $toName, string $subject, string $bodyHtml): void
+    {
+        $gmailUser = $_ENV['GMAIL_FALLBACK_USER'] ?? null;
+        $gmailPass = $_ENV['GMAIL_FALLBACK_PASSWORD'] ?? null;
+
+        if (!$gmailUser || !$gmailPass) {
+            throw new \RuntimeException('No se pudo enviar el email: servidor SMTP principal falló y Gmail fallback no está configurado');
+        }
+
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $gmailUser;
+            $mail->Password   = $gmailPass;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+            $mail->CharSet    = 'UTF-8';
+
+            $mail->setFrom($gmailUser, $_ENV['APP_NAME'] ?? 'Sistema de Inscripciones');
+            $mail->addAddress($toEmail, $toName);
+
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body    = $bodyHtml;
+            $mail->AltBody = strip_tags($bodyHtml);
+
+            $mail->send();
+            ErrorHandler::log("Email enviado a {$toEmail} via Gmail fallback");
+        } catch (MailerException $e) {
+            ErrorHandler::log("Gmail fallback también falló para {$toEmail}: " . $mail->ErrorInfo);
+            throw new \RuntimeException('No se pudo enviar el email via Gmail: ' . $mail->ErrorInfo);
         }
     }
 
@@ -81,29 +139,45 @@ class Email
         $sent = 0;
         $fail = 0;
 
-        $stmt = $db->prepare(
-            "SELECT * FROM mail_queue WHERE status = 'pending' AND attempts < 3 ORDER BY created_at ASC LIMIT :limit"
-        );
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        $mails = $stmt->fetchAll();
+        try {
+            $stmt = $db->prepare(
+                "SELECT * FROM mail_queue WHERE status = 'pending' AND attempts < 3 ORDER BY created_at ASC LIMIT :limit"
+            );
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            $mails = $stmt->fetchAll();
 
-        foreach ($mails as $mail) {
-            try {
-                self::send($mail['to_email'], $mail['to_name'] ?? '', $mail['subject'], $mail['body_html']);
-
-                $db->prepare(
-                    "UPDATE mail_queue SET status = 'sent', sent_at = NOW() WHERE id = :id"
-                )->execute([':id' => $mail['id']]);
-
-                $sent++;
-            } catch (\RuntimeException $e) {
-                $db->prepare(
-                    "UPDATE mail_queue SET attempts = attempts + 1, status = IF(attempts >= 2, 'failed', 'pending') WHERE id = :id"
-                )->execute([':id' => $mail['id']]);
-
-                $fail++;
+            if (empty($mails)) {
+                return ['sent' => 0, 'failed' => 0];
             }
+
+            foreach ($mails as $mail) {
+                try {
+                    self::send($mail['to_email'], $mail['to_name'] ?? '', $mail['subject'], $mail['body_html']);
+
+                    $db->prepare(
+                        "UPDATE mail_queue SET status = 'sent', sent_at = NOW() WHERE id = :id"
+                    )->execute([':id' => $mail['id']]);
+
+                    $sent++;
+                } catch (\RuntimeException $e) {
+                    $db->prepare(
+                        "UPDATE mail_queue SET attempts = attempts + 1, status = IF(attempts >= 2, 'failed', 'pending') WHERE id = :id"
+                    )->execute([':id' => $mail['id']]);
+
+                    $fail++;
+                    ErrorHandler::log("Error enviando email a {$mail['to_email']}: " . $e->getMessage());
+                } catch (\Throwable $e) {
+                    $db->prepare(
+                        "UPDATE mail_queue SET attempts = attempts + 1 WHERE id = :id"
+                    )->execute([':id' => $mail['id']]);
+
+                    $fail++;
+                    ErrorHandler::log("Error inesperado procesando email {$mail['id']}: " . $e->getMessage());
+                }
+            }
+        } catch (\Throwable $e) {
+            ErrorHandler::log("Error crítico procesando cola: " . $e->getMessage());
         }
 
         return ['sent' => $sent, 'failed' => $fail];
@@ -153,8 +227,45 @@ class Email
      */
     public static function buildConfirmationHtml(array $event, array $formFields, array $responseData): string
     {
-        $appName   = htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8');
-        $eventTitle = htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8');
+        $appName      = htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8');
+        $eventTitle   = htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8');
+        $eventDesc    = htmlspecialchars($event['description'] ?? '', ENT_QUOTES, 'UTF-8');
+        $startDate    = $event['start_date'] ? date('d/m/Y', strtotime($event['start_date'])) : '';
+        $endDate      = $event['end_date'] ? date('d/m/Y', strtotime($event['end_date'])) : '';
+        $location     = htmlspecialchars($event['location'] ?? '', ENT_QUOTES, 'UTF-8');
+
+        // Imagen de portada
+        $coverImageHtml = '';
+        if (!empty($event['cover_image'])) {
+            $coverImageUrl = htmlspecialchars(APP_URL . '/' . $event['cover_image'], ENT_QUOTES, 'UTF-8');
+            $coverImageHtml = "<img src='{$coverImageUrl}' alt='{$eventTitle}' style='width:100%;max-width:600px;height:auto;display:block;margin:0 auto;border-radius:8px;margin-bottom:20px'>";
+        }
+
+        // Detalles del evento
+        $eventDetailsHtml = '';
+        if ($startDate || $endDate || $location || $eventDesc) {
+            $eventDetailsHtml = "<div style='background:#f9f9f9;border-left:4px solid #4f46e5;padding:15px;margin:20px 0;border-radius:4px'>";
+
+            if ($eventTitle) {
+                $eventDetailsHtml .= "<h3 style='margin:0 0 10px 0;color:#1f2937'>{$eventTitle}</h3>";
+            }
+
+            if ($startDate) {
+                $eventDetailsHtml .= "<p style='margin:5px 0;color:#4b5563'><strong>📅 Fecha de inicio:</strong> {$startDate}</p>";
+            }
+            if ($endDate) {
+                $eventDetailsHtml .= "<p style='margin:5px 0;color:#4b5563'><strong>📅 Fecha de fin:</strong> {$endDate}</p>";
+            }
+            if ($location) {
+                $eventDetailsHtml .= "<p style='margin:5px 0;color:#4b5563'><strong>📍 Ubicación:</strong> {$location}</p>";
+            }
+            if ($eventDesc) {
+                $eventDetailsHtml .= "<p style='margin:10px 0 0 0;color:#6b7280;font-size:14px'>{$eventDesc}</p>";
+            }
+
+            $eventDetailsHtml .= "</div>";
+        }
+
         $rows = '';
 
         // Cruzar campo a campo con su label
@@ -181,10 +292,16 @@ class Email
               <h1 style="color:#fff;margin:0;font-size:24px">{$appName}</h1>
             </div>
             <div style="padding:30px">
-              <h2>¡Tu inscripción fue recibida!</h2>
-              <p>Gracias por inscribirte a <strong>{$eventTitle}</strong>. A continuación el resumen de tus datos:</p>
+              {$coverImageHtml}
+              <h2 style="margin:0 0 10px 0">¡Tu inscripción fue recibida!</h2>
+              <p style="margin:0 0 20px 0">Gracias por inscribirte a <strong>{$eventTitle}</strong>.</p>
+
+              {$eventDetailsHtml}
+
+              <h3 style="margin:25px 0 15px 0;color:#1f2937">Resumen de tu inscripción:</h3>
               <table style="width:100%;border-collapse:collapse;margin:20px 0">{$rows}</table>
-              <p style="color:#666;font-size:14px">Si tenés alguna consulta, respondé este email o contactá a los organizadores del evento.</p>
+
+              <p style="color:#666;font-size:14px;margin-top:20px">Si tenés alguna consulta, respondé este email o contactá a los organizadores del evento.</p>
             </div>
           </div>
         </body>

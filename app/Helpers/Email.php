@@ -34,6 +34,12 @@ class Email
             $mail->SMTPSecure  = $config['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port        = $config['port'];
             $mail->CharSet     = 'UTF-8';
+            $mail->Timeout     = 30;
+            $mail->SMTPKeepAlive = false;
+
+            // Log de configuración para diagnóstico (sin exponer password completo)
+            $maskedPass = substr($config['password'], 0, 3) . '***' . substr($config['password'], -2);
+            ErrorHandler::log("SMTP Config: host={$config['host']}, port={$config['port']}, user={$config['username']}, pass={$maskedPass}, encryption={$config['encryption']}");
 
             // Remitente
             $mail->setFrom($config['from_address'], $config['from_name']);
@@ -48,16 +54,21 @@ class Email
             $mail->AltBody = strip_tags($bodyHtml);
 
             $mail->send();
+            ErrorHandler::log("Email enviado exitosamente a {$toEmail} via {$config['host']}");
         } catch (MailerException $e) {
             ErrorHandler::log("Error enviando email a {$toEmail} con servidor {$config['host']}: " . $mail->ErrorInfo);
 
             // FALLBACK: Intentar con Gmail si falla el servidor primario
-            if (strpos($config['host'], 'appcde.online') !== false && strpos($mail->ErrorInfo, 'Could not authenticate') !== false) {
+            if (strpos($config['host'], 'appcde.online') !== false) {
                 ErrorHandler::log("Intentando fallback con Gmail para {$toEmail}");
-                self::sendViaGmailFallback($toEmail, $toName, $subject, $bodyHtml);
-            } else {
-                throw new \RuntimeException('No se pudo enviar el email: ' . $mail->ErrorInfo);
+                try {
+                    self::sendViaGmailFallback($toEmail, $toName, $subject, $bodyHtml);
+                    return; // Gmail funcionó, salimos
+                } catch (\Throwable $gmailEx) {
+                    ErrorHandler::log("Gmail fallback también falló: " . $gmailEx->getMessage());
+                }
             }
+            throw new \RuntimeException('No se pudo enviar el email: ' . $mail->ErrorInfo);
         }
     }
 
