@@ -34,6 +34,7 @@
 - El deploy va a `/DeployCorregido/` o `/deploy-files/`
 - Siempre copiar `.env` manualmente al servidor (no está en git)
 - Archivos de diagnóstico (`diagnose-emails.php`, `test-smtp.php`) no deben quedar en producción
+- **El usuario sube archivos por FTP manualmente.** Al final de cada iteración, indicar siempre si hay archivos para subir y cuáles son (ruta local → ruta en servidor).
 
 ---
 

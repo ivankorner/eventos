@@ -223,52 +223,47 @@ class Email
     }
 
     /**
-     * Construye el HTML de confirmación de inscripción para el inscripto
+     * Construye el HTML de confirmación de inscripción para el inscripto (voucher)
      */
-    public static function buildConfirmationHtml(array $event, array $formFields, array $responseData): string
+    public static function buildConfirmationHtml(array $event, array $formFields, array $responseData, int $subId = 0): string
     {
-        $appName      = htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8');
-        $eventTitle   = htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8');
-        $eventDesc    = htmlspecialchars($event['description'] ?? '', ENT_QUOTES, 'UTF-8');
-        $startDate    = $event['start_date'] ? date('d/m/Y', strtotime($event['start_date'])) : '';
-        $endDate      = $event['end_date'] ? date('d/m/Y', strtotime($event['end_date'])) : '';
-        $location     = htmlspecialchars($event['location'] ?? '', ENT_QUOTES, 'UTF-8');
+        $appName    = htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8');
+        $eventTitle = htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8');
+        $eventDesc  = htmlspecialchars($event['description'] ?? '', ENT_QUOTES, 'UTF-8');
+        $location   = htmlspecialchars($event['location'] ?? '', ENT_QUOTES, 'UTF-8');
+        $refNumber  = $subId > 0 ? 'INS-' . str_pad($subId, 6, '0', STR_PAD_LEFT) : '';
+        $issuedAt   = date('d/m/Y H:i');
+
+        // Fecha(s) del evento
+        $dateHtml = '';
+        if (!empty($event['start_date'])) {
+            $start = date('d/m/Y', strtotime($event['start_date']));
+            $dateHtml = $start;
+            if (!empty($event['end_date']) && $event['end_date'] !== $event['start_date']) {
+                $dateHtml .= ' al ' . date('d/m/Y', strtotime($event['end_date']));
+            }
+        }
 
         // Imagen de portada
         $coverImageHtml = '';
         if (!empty($event['cover_image'])) {
             $coverImageUrl = htmlspecialchars(APP_URL . '/' . $event['cover_image'], ENT_QUOTES, 'UTF-8');
-            $coverImageHtml = "<img src='{$coverImageUrl}' alt='{$eventTitle}' style='width:100%;max-width:600px;height:auto;display:block;margin:0 auto;border-radius:8px;margin-bottom:20px'>";
+            $coverImageHtml = "<img src='{$coverImageUrl}' alt='{$eventTitle}' style='width:100%;height:200px;object-fit:cover;display:block;'>";
         }
 
-        // Detalles del evento
-        $eventDetailsHtml = '';
-        if ($startDate || $endDate || $location || $eventDesc) {
-            $eventDetailsHtml = "<div style='background:#f9f9f9;border-left:4px solid #4f46e5;padding:15px;margin:20px 0;border-radius:4px'>";
-
-            if ($eventTitle) {
-                $eventDetailsHtml .= "<h3 style='margin:0 0 10px 0;color:#1f2937'>{$eventTitle}</h3>";
-            }
-
-            if ($startDate) {
-                $eventDetailsHtml .= "<p style='margin:5px 0;color:#4b5563'><strong>📅 Fecha de inicio:</strong> {$startDate}</p>";
-            }
-            if ($endDate) {
-                $eventDetailsHtml .= "<p style='margin:5px 0;color:#4b5563'><strong>📅 Fecha de fin:</strong> {$endDate}</p>";
-            }
-            if ($location) {
-                $eventDetailsHtml .= "<p style='margin:5px 0;color:#4b5563'><strong>📍 Ubicación:</strong> {$location}</p>";
-            }
-            if ($eventDesc) {
-                $eventDetailsHtml .= "<p style='margin:10px 0 0 0;color:#6b7280;font-size:14px'>{$eventDesc}</p>";
-            }
-
-            $eventDetailsHtml .= "</div>";
+        // Fila de datos del evento (fecha, lugar)
+        $eventMeta = '';
+        if ($dateHtml) {
+            $eventMeta .= "<td style='padding:10px 16px;vertical-align:top;width:50%'><span style='display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:4px'>Fecha</span><span style='font-size:15px;font-weight:600;color:#1f2937'>{$dateHtml}</span></td>";
         }
+        if ($location) {
+            $eventMeta .= "<td style='padding:10px 16px;vertical-align:top;width:50%'><span style='display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:4px'>Lugar</span><span style='font-size:15px;font-weight:600;color:#1f2937'>{$location}</span></td>";
+        }
+        $eventMetaRow = $eventMeta ? "<table width='100%' style='border-collapse:collapse;border-top:1px dashed #e5e7eb;margin-top:16px'><tr>{$eventMeta}</tr></table>" : '';
 
+        // Filas de datos del inscripto
         $rows = '';
-
-        // Cruzar campo a campo con su label
+        $bg = false;
         foreach ($formFields as $field) {
             if (in_array($field['type'], ['heading', 'paragraph'], true)) {
                 continue;
@@ -278,35 +273,102 @@ class Email
             if (is_array($value)) {
                 $value = implode(', ', $value);
             }
-            $value = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-            $rows .= "<tr><td style='padding:8px;background:#f9f9f9;font-weight:bold'>{$label}</td><td style='padding:8px'>{$value}</td></tr>";
+            $value   = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+            $rowBg   = $bg ? '#f9fafb' : '#ffffff';
+            $rows   .= "<tr style='background:{$rowBg}'>
+                          <td style='padding:10px 16px;font-size:13px;color:#6b7280;width:40%;border-bottom:1px solid #f3f4f6'>{$label}</td>
+                          <td style='padding:10px 16px;font-size:14px;font-weight:600;color:#111827;border-bottom:1px solid #f3f4f6'>{$value}</td>
+                        </tr>";
+            $bg = !$bg;
         }
 
+        // Número de referencia (solo si existe)
+        $refHtml = $refNumber
+            ? "<div style='text-align:center;margin-bottom:24px'>
+                 <span style='display:inline-block;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;font-family:monospace;font-size:18px;font-weight:700;letter-spacing:2px;padding:8px 20px;border-radius:6px'>{$refNumber}</span>
+                 <div style='font-size:11px;color:#9ca3af;margin-top:6px;text-transform:uppercase;letter-spacing:1px'>N&uacute;mero de inscripci&oacute;n</div>
+               </div>"
+            : '';
+
         return <<<HTML
-        <!DOCTYPE html>
-        <html lang="es">
-        <head><meta charset="UTF-8"><title>Confirmación de inscripción</title></head>
-        <body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:20px">
-          <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden">
-            <div style="background:#4f46e5;padding:30px;text-align:center">
-              <h1 style="color:#fff;margin:0;font-size:24px">{$appName}</h1>
-            </div>
-            <div style="padding:30px">
-              {$coverImageHtml}
-              <h2 style="margin:0 0 10px 0">¡Tu inscripción fue recibida!</h2>
-              <p style="margin:0 0 20px 0">Gracias por inscribirte a <strong>{$eventTitle}</strong>.</p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comprobante de inscripci&oacute;n</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:32px 16px">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
 
-              {$eventDetailsHtml}
+  <!-- CABECERA -->
+  <tr>
+    <td style="background:#4338ca;padding:24px 32px;border-radius:12px 12px 0 0;text-align:center">
+      <p style="margin:0;color:#c7d2fe;font-size:12px;text-transform:uppercase;letter-spacing:2px">{$appName}</p>
+      <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px;font-weight:700">Comprobante de Inscripci&oacute;n</h1>
+    </td>
+  </tr>
 
-              <h3 style="margin:25px 0 15px 0;color:#1f2937">Resumen de tu inscripción:</h3>
-              <table style="width:100%;border-collapse:collapse;margin:20px 0">{$rows}</table>
+  <!-- IMAGEN PORTADA -->
+  {$coverImageHtml}
 
-              <p style="color:#666;font-size:14px;margin-top:20px">Si tenés alguna consulta, respondé este email o contactá a los organizadores del evento.</p>
-            </div>
-          </div>
-        </body>
-        </html>
-        HTML;
+  <!-- CUERPO PRINCIPAL -->
+  <tr>
+    <td style="background:#ffffff;padding:32px">
+
+      <!-- BADGE CONFIRMADO -->
+      <div style="text-align:center;margin-bottom:28px">
+        <span style="display:inline-block;background:#dcfce7;border:2px solid #86efac;color:#166534;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:6px 18px;border-radius:99px">
+          &#10003; Inscripci&oacute;n Confirmada
+        </span>
+      </div>
+
+      <!-- NÚMERO DE REFERENCIA -->
+      {$refHtml}
+
+      <!-- DATOS DEL EVENTO -->
+      <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:28px">
+        <div style="background:#4338ca;padding:10px 16px">
+          <span style="color:#e0e7ff;font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:600">Evento</span>
+        </div>
+        <div style="padding:16px">
+          <h2 style="margin:0 0 6px;font-size:18px;color:#111827;font-weight:700">{$eventTitle}</h2>
+          {$eventMetaRow}
+        </div>
+      </div>
+
+      <!-- DATOS DEL INSCRIPTO -->
+      <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:28px">
+        <div style="background:#f9fafb;padding:10px 16px;border-bottom:1px solid #e5e7eb">
+          <span style="color:#374151;font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:600">Datos del inscripto</span>
+        </div>
+        <table width="100%" cellpadding="0" cellspacing="0">{$rows}</table>
+      </div>
+
+      <!-- PIE -->
+      <p style="margin:0;font-size:13px;color:#6b7280;text-align:center">
+        Comprobante emitido el {$issuedAt}.<br>
+        Conserv&aacute; este email como constancia de tu inscripci&oacute;n.
+      </p>
+
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td style="background:#1e1b4b;padding:16px 32px;border-radius:0 0 12px 12px;text-align:center">
+      <p style="margin:0;color:#a5b4fc;font-size:12px">{$appName} &mdash; No contestar este mail.</p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>
+HTML;
     }
 
     /**

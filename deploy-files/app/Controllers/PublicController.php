@@ -193,34 +193,29 @@ class PublicController
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $subId = $this->subModel->create($form['id'], $event['id'], $responseData, $ip, $ua);
 
-        // Enviar email de confirmación al inscripto
+        // Enviar email de confirmación al inscripto (directo, NO bloquea si falla)
         if ($emailField && !empty($responseData[$emailField])) {
             try {
-                $html = Email::buildConfirmationHtml($event, $formFields, $responseData);
-                Email::queue(
-                    $responseData[$emailField],
-                    $responseData[array_keys($responseData)[0]] ?? 'Inscripto/a',
-                    'Confirmación de inscripción — ' . $event['title'],
-                    $html
-                );
+                $toEmail  = $responseData[$emailField];
+                $toName   = $responseData[array_keys($responseData)[0]] ?? 'Inscripto/a';
+                $html     = Email::buildConfirmationHtml($event, $formFields, $responseData, $subId);
+                Email::send($toEmail, $toName, 'Confirmación de inscripción — ' . $event['title'], $html);
+                ErrorHandler::log("Confirmación enviada a {$toEmail}");
             } catch (\Throwable $e) {
-                ErrorHandler::log('Error encolando confirmación: ' . $e->getMessage());
+                ErrorHandler::log('Error enviando confirmación a ' . ($toEmail ?? 'desconocido') . ': ' . $e->getMessage());
             }
         }
 
-        // Enviar notificación al organizador
+        // Enviar notificación al organizador (directo, NO bloquea si falla)
         $notifyEmail = $formSettings['notify_email'] ?? $event['notify_email'] ?? '';
         if ($notifyEmail) {
             try {
                 $html = Email::buildNotificationHtml($event, $formFields, $responseData, date('d/m/Y H:i'), $ip);
-                Email::queue($notifyEmail, 'Organizador', 'Nueva inscripción — ' . $event['title'], $html);
+                Email::send($notifyEmail, 'Organizador', 'Nueva inscripción — ' . $event['title'], $html);
             } catch (\Throwable $e) {
-                ErrorHandler::log('Error encolando notificación al organizador: ' . $e->getMessage());
+                ErrorHandler::log('Error enviando notificación al organizador ' . $notifyEmail . ': ' . $e->getMessage());
             }
         }
-
-        // Procesar cola de emails al final del request
-        Email::processQueue(5);
 
         $successMsg = $formSettings['success_message'] ?? '¡Gracias! Tu inscripción fue recibida.';
         Session::flash('success_message', $successMsg);
